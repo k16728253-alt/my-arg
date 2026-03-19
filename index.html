@@ -12,50 +12,67 @@
             overflow: hidden;
         }
 
-        #img {
+        #dark {
             position: absolute;
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0.3;
+            opacity: 1;
+        }
+
+        #light {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.3s;
             pointer-events: none;
         }
 
         #hidden {
             position: absolute;
-            color: #39ff14;
+            color: #ff3b3b;
             font-family: monospace;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.2s;
             pointer-events: none;
-            text-shadow: 0 0 10px #39ff14;
+            text-shadow: 0 0 10px #ff3b3b;
         }
     </style>
 </head>
 
 <body>
 
-    <img src="youbetterstop.png" id="img">
+    <img src="youbetterstop.png" id="dark">
+    <img src="fine.png" id="light">
 
-    <div id="hidden">are you sure youre gonna keep going?</div>
+    <div id="hidden"></div>
 
     <script>
 
+        let revealCount = 0;
         let timer = null;
-
         let targetX = 0;
         let targetY = 0;
 
+        let keyX = 0;
+        let keyY = 0;
+
+        const parts = ["it", " sees", " you", " too."];
 
         function setRandomPosition() {
-            targetX = window.innerWidth * (0.3 + Math.random() * 0.4);
-            targetY = window.innerHeight * (0.3 + Math.random() * 0.4);
+
+            targetX = window.innerWidth * (0.7 + Math.random() * 0.25);
+            targetY = window.innerHeight * (0.7 + Math.random() * 0.25);
+
+            keyX = Math.floor(targetX);
+            keyY = Math.floor(targetY);
 
             const el = document.getElementById("hidden");
             el.style.left = targetX + "px";
             el.style.top = targetY + "px";
         }
-
 
         setRandomPosition();
 
@@ -63,32 +80,53 @@
 
             const dist = Math.hypot(e.clientX - targetX, e.clientY - targetY);
 
+            const light = document.getElementById("light");
+
+            let strength = Math.max(0, 1 - dist / 150);
+            light.style.opacity = strength;
+
             if (dist < 80) {
 
                 if (!timer) {
                     timer = setTimeout(() => {
 
                         const el = document.getElementById("hidden");
+
+                        let text = "";
+
+                        if (revealCount === 0) {
+
+                            text = parts.sort(() => Math.random() - 0.5).join("");
+                        } else {
+
+                            text = '"where are you pointing?"';
+                        }
+
+                        el.innerText = text;
                         el.style.opacity = 1;
 
+                        if (revealCount < 1) {
+                            revealCount++;
+                        }
                         setTimeout(() => {
                             el.style.opacity = 0;
                             setRandomPosition();
-                        }, 1500);
+                        }, 1200);
 
                         timer = null;
 
-                    }, 2000);
+                    }, 1500);
                 }
 
             } else {
-
                 clearTimeout(timer);
                 timer = null;
                 document.getElementById("hidden").style.opacity = 0;
             }
 
         });
+
+        console.log("trace:", (keyX ^ 1337) + "-" + (keyY ^ 7331));
 
     </script>
 
